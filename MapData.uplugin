@@ -16,6 +16,13 @@
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"AcceptsAnyRemoteVersion": false,
+	"Modules": [
+		{
+			"Name": "MapData",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
 	"Plugins": [
 		{
 			"Name": "SML",
