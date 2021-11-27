@@ -1,0 +1,27 @@
+{
+	"FileVersion": 3,
+	"Version": 0,
+	"VersionName": "0.1.0",
+	"SemVersion": "0.1.0",
+	"FriendlyName": "Map Data",
+	"Description": "Export map data.",
+	"Category": "Modding",
+	"CreatedBy": "moritz-h",
+	"CreatedByURL": "https://github.com/moritz-h",
+	"DocsURL": "https://github.com/moritz-h/satisfactory-mapdata",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"AcceptsAnyRemoteVersion": false,
+	"Plugins": [
+		{
+			"Name": "SML",
+			"SemVersion": "^3.2.0",
+			"bIsOptional": false,
+			"Enabled": true
+		}
+	]
+}
