@@ -4,6 +4,9 @@
 #include "Resources/FGResourceNode.h"
 #include "Resources/FGResourceDeposit.h"
 
+#include "JsonUtils.h"
+#include "MapDataStructs.h"
+
 AMapDataSubsystem::AMapDataSubsystem()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -32,24 +35,28 @@ void AMapDataSubsystem::BeginPlay()
         }
     }
 
-    TArray<FString> Lines;
-    TArray<AActor*> FoundActors;
-    FString FileName;
+    ExportAllActors(MapDataDir + TEXT("/all-actors.json"));
+    ExportResourceNodes(MapDataDir + TEXT("/resource-nodes.json"));
+}
 
-    // All Actor names
-    Lines.Empty();
-    FoundActors.Empty();
+void AMapDataSubsystem::ExportAllActors(const FString& FileName)
+{
+    TArray<FActorInfo> InfoArray;
+    TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
     for (AActor* TActor : FoundActors) {
-        Lines.Add(TActor->GetName());
+        FActorInfo ActorInfo;
+        ActorInfo.Name = TActor->GetName();
+        ActorInfo.Class = TActor->GetClass()->GetName();
+        InfoArray.Emplace(ActorInfo);
     }
-    FileName = MapDataDir;
-    FileName.Append(TEXT("/all-actor-names.txt"));
-    FFileHelper::SaveStringArrayToFile(Lines, *FileName);
+    JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("actors"), *FileName);
+}
 
-    // Resource Nodes
-    Lines.Empty();
-    FoundActors.Empty();
+void AMapDataSubsystem::ExportResourceNodes(const FString& FileName)
+{
+    TArray<FResourceNodeInfo> InfoArray;
+    TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFGResourceNodeBase::StaticClass(), FoundActors);
     for (AActor* TActor : FoundActors) {
         AFGResourceNodeBase* resource = Cast<AFGResourceNodeBase>(TActor);
@@ -57,23 +64,21 @@ void AMapDataSubsystem::BeginPlay()
             continue;
         }
         if (resource != nullptr) {
-            FString name = resource->GetName();
-            FString resName = resource->GetResourceName().ToString();
+            FResourceNodeInfo ResourceNodeInfo;
+            ResourceNodeInfo.Name = resource->GetName();
+            ResourceNodeInfo.ResourceName = resource->GetResourceName().ToString();
             // (int32)resource->GetResourceNodeType();
             if (Cast<AFGResourceNode>(resource)) {
                 AFGResourceNode* obj = Cast<AFGResourceNode>(resource);
-                FString p = obj->GetResoucePurityText().ToString();
+                ResourceNodeInfo.ResoucePurity = obj->GetResoucePurityText().ToString();
                 // (int32)obj->GetResoucePurity();
-                Lines.Add(FString::Printf(TEXT("%s,%s,%s"), *name, *resName, *p));
+            } else {
+                ResourceNodeInfo.ResoucePurity = TEXT("");
             }
-            else {
-                Lines.Add(FString::Printf(TEXT("%s,%s"), *name, *resName));
-            }
+            InfoArray.Emplace(ResourceNodeInfo);
         }
     }
-    FileName = MapDataDir;
-    FileName.Append(TEXT("/resource-nodes.txt"));
-    FFileHelper::SaveStringArrayToFile(Lines, *FileName);
+    JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("resource-nodes"), *FileName);
 }
 
 void AMapDataSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason)

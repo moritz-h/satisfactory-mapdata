@@ -20,4 +20,9 @@ class MAPDATA_API AMapDataSubsystem : public AModSubsystem
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     virtual void Tick(float DeltaSeconds) override;
+
+protected:
+    void ExportAllActors(const FString& FileName);
+
+    void ExportResourceNodes(const FString& FileName);
 };

@@ -31,5 +31,10 @@ public class MapData : ModuleRules
             PublicDependencyModuleNames.AddRange(new string[] {"OnlineBlueprintSupport", "AnimGraph"});
         }
         PublicDependencyModuleNames.AddRange(new string[] {"FactoryGame", "SML"});
+
+        PrivateDependencyModuleNames.AddRange(new string[] {
+            "JsonUtilities"
+        });
+
     }
 }
