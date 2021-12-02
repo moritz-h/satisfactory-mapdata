@@ -17,19 +17,13 @@ void AMapDataSubsystem::BeginPlay()
 {
     Super::BeginPlay();
 
-    // FPaths::RootDir()         | C:/Program Files (x86)/Steam/steamapps/common/Satisfactory/
-    // FPaths::ProjectUserDir()  | %LOCALAPPDATA%/FactoryGame/
-    // FPaths::ProjectSavedDir() | %LOCALAPPDATA%/FactoryGame/Saved/
-
     FString MapDataDir = FPaths::ProjectUserDir();
     MapDataDir.Append(TEXT("MapData-Export"));
 
     IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
 
-    if (!FileManager.DirectoryExists(*MapDataDir))
-    {
-        if (!FileManager.CreateDirectory(*MapDataDir))
-        {
+    if (!FileManager.DirectoryExists(*MapDataDir)) {
+        if (!FileManager.CreateDirectory(*MapDataDir)) {
             UE_LOG(LogTemp, Error, TEXT("MapData: Cannot create export dir!"));
             return;
         }
@@ -37,6 +31,16 @@ void AMapDataSubsystem::BeginPlay()
 
     ExportAllActors(MapDataDir + TEXT("/all-actors.json"));
     ExportResourceNodes(MapDataDir + TEXT("/resource-nodes.json"));
+}
+
+void AMapDataSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+}
+
+void AMapDataSubsystem::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
 }
 
 void AMapDataSubsystem::ExportAllActors(const FString& FileName)
@@ -79,14 +83,4 @@ void AMapDataSubsystem::ExportResourceNodes(const FString& FileName)
         }
     }
     JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("resource-nodes"), *FileName);
-}
-
-void AMapDataSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-    Super::EndPlay(EndPlayReason);
-}
-
-void AMapDataSubsystem::Tick(float DeltaSeconds)
-{
-    Super::Tick(DeltaSeconds);
 }
