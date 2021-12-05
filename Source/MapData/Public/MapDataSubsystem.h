@@ -25,4 +25,6 @@ protected:
     void ExportAllActors(const FString& FileName);
 
     void ExportResourceNodes(const FString& FileName);
+
+    void ExportDropPods(const FString& FileName);
 };

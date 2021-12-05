@@ -30,3 +30,24 @@ struct FResourceNodeInfo
     UPROPERTY()
     FString ResoucePurity;
 };
+
+USTRUCT()
+struct FDropPodInfo
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    FString Name;
+
+    UPROPERTY()
+    float PowerConsumption;
+
+    UPROPERTY()
+    FString RepairItemClass;
+
+    UPROPERTY()
+    FString RepairItemName;
+
+    UPROPERTY()
+    int RepairItemAmount;
+};
