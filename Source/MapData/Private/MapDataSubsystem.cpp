@@ -1,9 +1,11 @@
 #include "MapDataSubsystem.h"
 
 #include "FGDropPod.h"
-#include "Resources/FGResourceNodeFrackingCore.h"
-#include "Resources/FGResourceNode.h"
+#include "FGResourceNodeGeyser.h"
 #include "Resources/FGResourceDeposit.h"
+#include "Resources/FGResourceNode.h"
+#include "Resources/FGResourceNodeFrackingCore.h"
+#include "Resources/FGResourceNodeFrackingSatellite.h"
 
 #include "JsonUtils.h"
 #include "MapDataStructs.h"
@@ -30,9 +32,9 @@ void AMapDataSubsystem::BeginPlay()
         }
     }
 
-    ExportAllActors(MapDataDir + TEXT("/all-actors.json"));
-    ExportResourceNodes(MapDataDir + TEXT("/resource-nodes.json"));
-    ExportDropPods(MapDataDir + TEXT("/drop-pods.json"));
+    ExportAllActors(MapDataDir + TEXT("/AllActors.json"));
+    ExportResourceNodes(MapDataDir + TEXT("/ResourceNodes.json"));
+    ExportDropPods(MapDataDir + TEXT("/DropPods.json"));
 }
 
 void AMapDataSubsystem::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -50,41 +52,49 @@ void AMapDataSubsystem::ExportAllActors(const FString& FileName)
     TArray<FActorInfo> InfoArray;
     TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
-    for (AActor* TActor : FoundActors) {
-        FActorInfo ActorInfo;
-        ActorInfo.Name = TActor->GetName();
-        ActorInfo.Class = TActor->GetClass()->GetName();
-        InfoArray.Emplace(ActorInfo);
+    for (AActor* Actor : FoundActors) {
+        InfoArray.Emplace(FActorInfo(Actor));
     }
     JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("actors"), *FileName);
 }
 
 void AMapDataSubsystem::ExportResourceNodes(const FString& FileName)
 {
-    TArray<FResourceNodeInfo> InfoArray;
+    FResourceInfo ResourceInfo;
     TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFGResourceNodeBase::StaticClass(), FoundActors);
-    for (AActor* TActor : FoundActors) {
-        AFGResourceNodeBase* resource = Cast<AFGResourceNodeBase>(TActor);
-        if (Cast<AFGResourceDeposit>(resource)) {
+    for (AActor* Actor : FoundActors) {
+        AFGResourceNodeBase* ResourceNodeBase = Cast<AFGResourceNodeBase>(Actor);
+        if (ResourceNodeBase == nullptr) {
             continue;
         }
-        if (resource != nullptr) {
-            FResourceNodeInfo ResourceNodeInfo;
-            ResourceNodeInfo.Name = resource->GetName();
-            ResourceNodeInfo.ResourceName = resource->GetResourceName().ToString();
-            // (int32)resource->GetResourceNodeType();
-            if (Cast<AFGResourceNode>(resource)) {
-                AFGResourceNode* obj = Cast<AFGResourceNode>(resource);
-                ResourceNodeInfo.ResoucePurity = obj->GetResoucePurityText().ToString();
-                // (int32)obj->GetResoucePurity();
-            } else {
-                ResourceNodeInfo.ResoucePurity = TEXT("");
-            }
-            InfoArray.Emplace(ResourceNodeInfo);
+        // ignore deposits
+        if (Cast<AFGResourceDeposit>(ResourceNodeBase)) {
+            continue;
         }
+        AFGResourceNodeFrackingSatellite* FrackingSatellite = Cast<AFGResourceNodeFrackingSatellite>(ResourceNodeBase);
+        if (FrackingSatellite != nullptr) {
+            ResourceInfo.FrackingSatellites.Emplace(FResourceFrackingSatelliteInfo(FrackingSatellite));
+            continue;
+        }
+        AFGResourceNodeFrackingCore* FrackingCore = Cast<AFGResourceNodeFrackingCore>(ResourceNodeBase);
+        if (FrackingCore != nullptr) {
+            ResourceInfo.FrackingCores.Emplace(FResourceNodeBaseInfo(FrackingCore));
+            continue;
+        }
+        AFGResourceNodeGeyser* Geyser = Cast<AFGResourceNodeGeyser>(ResourceNodeBase);
+        if (Geyser != nullptr) {
+            ResourceInfo.Geysers.Emplace(FResourceNodeInfo(Geyser));
+            continue;
+        }
+        AFGResourceNode* ResourceNode = Cast<AFGResourceNode>(ResourceNodeBase);
+        if (ResourceNode != nullptr) {
+            ResourceInfo.Nodes.Emplace(FResourceNodeInfo(ResourceNode));
+            continue;
+        }
+        UE_LOG(LogTemp, Warning, TEXT("MapData: Unknown ResourceNode!"));
     }
-    JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("resource-nodes"), *FileName);
+    JsonUtils::WriteStructToJsonFile(ResourceInfo, *FileName);
 }
 
 void AMapDataSubsystem::ExportDropPods(const FString& FileName)
@@ -95,25 +105,8 @@ void AMapDataSubsystem::ExportDropPods(const FString& FileName)
     for (AActor* TActor : FoundActors) {
         AFGDropPod* DropPod = Cast<AFGDropPod>(TActor);
         if (DropPod != nullptr) {
-            FDropPodInfo DropPodInfo;
-            DropPodInfo.Name = DropPod->GetName();
-
-            // Power
-            FFloatProperty* PowerConsumption = Cast<FFloatProperty>(DropPod->GetClass()->FindPropertyByName(FName(TEXT("mPowerConsumption"))));
-            DropPodInfo.PowerConsumption = PowerConsumption->GetPropertyValue_InContainer(DropPod);
-
-            // Items
-            FStructProperty* RepairAmount = Cast<FStructProperty>(DropPod->GetClass()->FindPropertyByName(FName(TEXT("mRepairAmount"))));
-            FItemAmount* ItemAmount = RepairAmount->ContainerPtrToValuePtr<FItemAmount>(DropPod);
-            auto ItemClass = ItemAmount->ItemClass;
-            if (ItemClass) {
-                DropPodInfo.RepairItemClass = ItemClass->GetName();
-                DropPodInfo.RepairItemName = UFGItemDescriptor::GetItemName(ItemClass).ToString();
-            }
-            DropPodInfo.RepairItemAmount = ItemAmount->Amount;
-
-            InfoArray.Emplace(DropPodInfo);
+            InfoArray.Emplace(FDropPodInfo(DropPod));
         }
     }
-    JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("drop-pods"), *FileName);
+    JsonUtils::WriteStructArrayToJsonFile(InfoArray, TEXT("dropPods"), *FileName);
 }

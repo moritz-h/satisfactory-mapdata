@@ -15,6 +15,14 @@ public:
     }
 
     template<typename Struct_T>
+    static void WriteStructToJsonFile(const Struct_T& Struct, const FString& FileName)
+    {
+        TSharedRef<FJsonObject> JsonRoot = MakeShareable(new FJsonObject);
+        FJsonObjectConverter::UStructToJsonObject(Struct_T::StaticStruct(), &Struct, JsonRoot, 0, 0);
+        JsonUtils::WriteJsonToFile(JsonRoot, *FileName);
+    }
+
+    template<typename Struct_T>
     static TArray<TSharedPtr<FJsonValue>> StructArrayToJsonValueArray(const TArray<Struct_T>& StructArray)
     {
         TArray<TSharedPtr<FJsonValue>> JsonArray;
