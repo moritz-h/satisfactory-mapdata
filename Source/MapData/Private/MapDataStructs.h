@@ -9,12 +9,12 @@
 #include "MapDataStructs.generated.h"
 
 USTRUCT()
-struct FItemInfo
+struct FItemDescriptorInfo
 {
     GENERATED_BODY()
 
-    FItemInfo() = default;
-    FItemInfo(TSubclassOf<UFGItemDescriptor> Item) {
+    FItemDescriptorInfo() = default;
+    FItemDescriptorInfo(TSubclassOf<UFGItemDescriptor> Item) {
         Class = Item->GetName();
         Name = UFGItemDescriptor::GetItemName(Item).ToString();
     }
@@ -68,11 +68,11 @@ struct FResourceNodeBaseInfo : public FActorInfo
 
     FResourceNodeBaseInfo() = default;
     FResourceNodeBaseInfo(const AFGResourceNodeBase* ResourceNode) : FActorInfo(ResourceNode) {
-        Item = FItemInfo(ResourceNode->GetResourceClass());
+        Item = FItemDescriptorInfo(ResourceNode->GetResourceClass());
     }
 
     UPROPERTY()
-    FItemInfo Item;
+    FItemDescriptorInfo Item;
 };
 
 USTRUCT()
@@ -136,7 +136,7 @@ struct FDropPodInfo : public FActorInfo
         FStructProperty* RepairAmountProperty = Cast<FStructProperty>(DropPod->GetClass()->FindPropertyByName(FName(TEXT("mRepairAmount"))));
         FItemAmount* ItemAmount = RepairAmountProperty->ContainerPtrToValuePtr<FItemAmount>(DropPod);
         if (ItemAmount->ItemClass) {
-            RepairItem = FItemInfo(ItemAmount->ItemClass);
+            RepairItem = FItemDescriptorInfo(ItemAmount->ItemClass);
         }
         RepairItemAmount = ItemAmount->Amount;
     }
@@ -145,7 +145,7 @@ struct FDropPodInfo : public FActorInfo
     float PowerConsumption;
 
     UPROPERTY()
-    FItemInfo RepairItem;
+    FItemDescriptorInfo RepairItem;
 
     UPROPERTY()
     int RepairItemAmount;

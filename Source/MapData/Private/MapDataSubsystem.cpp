@@ -102,8 +102,8 @@ void AMapDataSubsystem::ExportDropPods(const FString& FileName)
     TArray<FDropPodInfo> InfoArray;
     TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFGDropPod::StaticClass(), FoundActors);
-    for (AActor* TActor : FoundActors) {
-        AFGDropPod* DropPod = Cast<AFGDropPod>(TActor);
+    for (AActor* Actor : FoundActors) {
+        AFGDropPod* DropPod = Cast<AFGDropPod>(Actor);
         if (DropPod != nullptr) {
             InfoArray.Emplace(FDropPodInfo(DropPod));
         }
