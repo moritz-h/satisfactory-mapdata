@@ -15,8 +15,10 @@ struct FItemDescriptorInfo
 
     FItemDescriptorInfo() = default;
     FItemDescriptorInfo(TSubclassOf<UFGItemDescriptor> Item) {
-        Class = Item->GetName();
-        Name = UFGItemDescriptor::GetItemName(Item).ToString();
+        if (Item) {
+            Class = Item->GetName();
+            Name = UFGItemDescriptor::GetItemName(Item).ToString();
+        }
     }
 
     UPROPERTY()
@@ -25,7 +27,6 @@ struct FItemDescriptorInfo
     UPROPERTY()
     FString Name = TEXT("");
 };
-
 
 USTRUCT()
 struct FActorInfo
@@ -135,9 +136,7 @@ struct FDropPodInfo : public FActorInfo
 
         FStructProperty* RepairAmountProperty = Cast<FStructProperty>(DropPod->GetClass()->FindPropertyByName(FName(TEXT("mRepairAmount"))));
         FItemAmount* ItemAmount = RepairAmountProperty->ContainerPtrToValuePtr<FItemAmount>(DropPod);
-        if (ItemAmount->ItemClass) {
-            RepairItem = FItemDescriptorInfo(ItemAmount->ItemClass);
-        }
+        RepairItem = FItemDescriptorInfo(ItemAmount->ItemClass);
         RepairItemAmount = ItemAmount->Amount;
     }
 

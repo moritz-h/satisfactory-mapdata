@@ -17,7 +17,7 @@ public:
     template<typename Struct_T>
     static void WriteStructToJsonFile(const Struct_T& Struct, const FString& FileName)
     {
-        TSharedRef<FJsonObject> JsonRoot = MakeShareable(new FJsonObject);
+        TSharedRef<FJsonObject> JsonRoot = MakeShared<FJsonObject>();
         FJsonObjectConverter::UStructToJsonObject(Struct_T::StaticStruct(), &Struct, JsonRoot, 0, 0);
         JsonUtils::WriteJsonToFile(JsonRoot, *FileName);
     }
@@ -28,10 +28,9 @@ public:
         TArray<TSharedPtr<FJsonValue>> JsonArray;
 
         for (const Struct_T& item : StructArray) {
-            TSharedRef<FJsonObject> JsonObj = MakeShareable(new FJsonObject);
+            TSharedRef<FJsonObject> JsonObj = MakeShared<FJsonObject>();
             FJsonObjectConverter::UStructToJsonObject(Struct_T::StaticStruct(), &item, JsonObj, 0, 0);
-            TSharedRef<FJsonValueObject> JsonValue = MakeShareable(new FJsonValueObject(JsonObj));
-            JsonArray.Add(JsonValue);
+            JsonArray.Add(MakeShared<FJsonValueObject>(JsonObj));
         }
         return JsonArray;
     }
@@ -40,7 +39,7 @@ public:
     static void WriteStructArrayToJsonFile(const TArray<Struct_T>& StructArray, const FString& ObjName, const FString& FileName)
     {
         TArray<TSharedPtr<FJsonValue>> ObjArray = JsonUtils::StructArrayToJsonValueArray(StructArray);
-        TSharedRef<FJsonObject> JsonRoot = MakeShareable(new FJsonObject);
+        TSharedRef<FJsonObject> JsonRoot = MakeShared<FJsonObject>();
         JsonRoot->SetArrayField(ObjName, ObjArray);
         JsonUtils::WriteJsonToFile(JsonRoot, *FileName);
     }
