@@ -1,8 +1,8 @@
 {
 	"FileVersion": 3,
 	"Version": 0,
-	"VersionName": "0.2.0",
-	"SemVersion": "0.2.0",
+	"VersionName": "0.3.0",
+	"SemVersion": "0.3.0",
 	"FriendlyName": "Map Data",
 	"Description": "Export map data.",
 	"Category": "Modding",
@@ -26,7 +26,7 @@
 	"Plugins": [
 		{
 			"Name": "SML",
-			"SemVersion": "^3.3.0",
+			"SemVersion": "^3.4.1",
 			"bIsOptional": false,
 			"Enabled": true
 		}
